@@ -11,17 +11,25 @@ app.use(
     bodyParser.urlencoded({
         extended:false
     })
-)
+);
+app.use(express.static(process.cwd() + "/public"));
 
 var expressHandleBars = require("express-handlebars");
 app.engine("handlebars", expressHandleBars({defaultLayout:"main"}));
 app.set("view engine", "handlebars");
 
+mongoose.connect("mongodb://localhost/ArticleScraper");
+var db = mongoose.connection;
+
+db.on("error", console.error.bind(console, "connection error:"));
+db.once("open", function(){
+    console.log("Connected to Mongoose");
+});
+
+
 var port = process.env.PORT ||3000
 app.listen(port, function(){
     console.log("Listening on PORT " + port);
-    
-
 }
 )
 
