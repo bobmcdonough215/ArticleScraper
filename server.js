@@ -14,12 +14,12 @@ app.use(
 );
 app.use(express.static(process.cwd() + "/public"));
 
-var expressHandleBars = require("express-handlebars");
-app.engine("handlebars", expressHandleBars({defaultLayout:"main"}));
+var exphbs = require("express-handlebars");
+app.engine("handlebars", exphbs({defaultLayout:"main"}));
 app.set("view engine", "handlebars");
 
 mongoose.connect("mongodb://localhost/ArticleScraper");
-var db = mongoose.connection;
+var db = mongoose.connection; 
 
 db.on("error", console.error.bind(console, "connection error:"));
 db.once("open", function(){

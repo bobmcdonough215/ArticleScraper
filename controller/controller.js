@@ -11,11 +11,11 @@ var Comment = require("../models/Comment.js");
 var Article = require("../models/Article.js");
 
 router.get("/", function(req, res) {
-  res.redirect("/index");
+  res.redirect("/articles");
 });
 
 router.get("/scrape", function(req, res) {
-  axios.get("http:longform.org/best", function(error, response, html) {
+  request("http:longform.org/best", function(error, response, html) {
     var $ = cheerio.load(html);
     var titlesArray = [];
 
@@ -117,7 +117,7 @@ router.get("/readArticle/:id", function(req, res) {
             hbsObj.body = $(this)
               .children("p")
               .text();
-              
+
 
             res.render("article", hbsObj);
             return false;

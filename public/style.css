@@ -1,29 +1,39 @@
-.new-article-btn {
-    margin-top: 10px;
-  }
-
-  .title-link {
-    text-decoration: none;
-    color: #000;
-  }
-  
-  .title-link:hover {
-    text-decoration: none;
-    color: #2c7df7;
-  }
-  
-  textarea {
-    display: block;
-    height: 200px;
+body {
+    background-size: 600px;
+    font-family: "Oswald", sans-serif;
     font-size: 16px;
-    width: 100%;
-    background-color: #ffffff;
-    border: 1px solid #cfcfcf;
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
   }
-  
-  #note {
-    text-transform: uppercase;
-    font-size: 13px;
-    color: #616161;
-    letter-spacing: 1px;
+  main {
+    flex: 1 0 auto;
+  }
+  .articleBody {
+    height: 200px;
+    font-size: 20px;
+    overflow-y: scroll;
+    line-height: 150%;
+  }
+  #btnSignUp {
+    background-color: #635f60;
+  }
+  #nameComment {
+    /*border-bottom: 2px solid #ec407a;*/
+    font-weight: bold;
+    background: #635f60;
+    color: white;
+  }
+  .input-field input[type="text"]:focus + label {
+    color: #635f60;
+  }
+  .input-field input[type="text"]:focus {
+    border-bottom: 1px solid #635f60;
+    box-shadow: 0 1px 0 0 #000;
+  }
+  .input-field .prefix.active {
+    color: #635f60;
+  }
+  .topnav {
+    background-color: #635f60;
   }
