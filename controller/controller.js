@@ -2,74 +2,113 @@ var express = require("express");
 var router = express.Router();
 var path = require("path");
 var axios =require("axios");
+var logger =require("morgan");
+var mongoose =require("mongoose");
 
 var request = require("request");
 var cheerio = require("cheerio");
+var app = express();
+var db =require("../models");
 // var axios =require("axios");
+
+// // Use morgan logger for logging requests
+// app.use(logger("dev"));
+// // Parse request body as JSON
+// app.use(express.urlencoded({ extended: true }));
+// app.use(express.json());
+// // Make public a static folder
+// // app.use("/".express.static("public"));
+
 
 var Comment = require("../models/Comment.js");
 var Article = require("../models/Article.js");
-
-router.get("/", function(req, res) {
-  res.redirect("/articles");
-});
+mongoose.connect("mongodb://localhost/articleScraper", { useNewUrlParser: true });
 
 
+
+router.get("/", function(req, res){
+  res.redirect("/articles")
+})
 router.get("/scrape", function(req, res) {
-  var titlesArray = [];
-  request("https://www.longform.org/best", function(error, response, html) {
+  request.get("https://www.longform.org/best", function(error, response, html) {
     // Load the html body from request into cheerio
     var $ = cheerio.load(html);
 
-  console.log(html);
 
   // Set the articles array for handlebar use
 
 
-    $("article.h2").each(function(i, element) {
+    $(".post").each(function(i, element) {
       var result = {};
 
-      result.id=i;
       result.title = $(this)
-        .children("a")
-        .text();
-      result.link = $(this)
-        .children("a")
-        .attr("href");
-
-        result.push(titlesArray);
+      .eq(2)
+      .children("h2")
+      .children("span")
+      .text()
 
 
-        res.render("/scrape", { articles: titlesArray });
+      result.link =$(this)
+      .attr("href")
+
+      result.summary=$(this)
+      .eq(3)
+      .children("div")
+      .text()
+
+      console.log(result);
 
 
-      if (result.title !== "" && result.link !== "") {
-        if (titlesArray.indexOf(result.title) == -1) {
-          titlesArray.push(result.title);
-
-          Article.count({ title: result.title }, function(err, test) {
-            if (test === 0) {
-              var entry = new Article(result);
-
-              entry.save(function(err, doc) {
-                if (err) {
-                  console.log(err);
-                } else {
-                  console.log(doc);
-                }
-              });
-            }
-          });
-        } else {
-          console.log("Article already exists.");
-        }
-      } else {
-        console.log("Not saved to DB, missing data");
-      }
+    db.Article.create(result)
+    .then(function(dbArticle) {
+      // View the added result in the console
+      console.log(dbArticle);
+    })
+    .catch(function(err) {
+      // If an error occurred, log it
+      console.log(err);
     });
-    res.redirect("/");
-  });
 });
+
+// Send a message to the client
+res.send("Scrape Complete");
+});
+});
+
+
+
+    //     result.push(titlesArray);
+
+
+    //     res.render("/scrape", { articles: titlesArray });
+
+
+    //   if (result.title !== "" && result.link !== "") {
+    //     if (titlesArray.indexOf(result.title) == -1) {
+    //       titlesArray.push(result.title);
+
+    //       Article.count({ title: result.title }, function(err, test) {
+    //         if (test === 0) {
+    //           var entry = new Article(result);
+
+    //           entry.save(function(err, doc) {
+    //             if (err) {
+    //               console.log(err);
+    //             } else {
+    //               console.log(doc);
+    //             }
+    //           });
+    //         }
+    //       });
+    //     } else {
+    //       console.log("Article already exists.");
+    //     }
+    //   } else {
+    //     console.log("Not saved to DB, missing data");
+    //   }
+    // });
+    // res.redirect("/");
+
 router.get("/articles", function(req, res) {
   Article.find()
     .sort({ _id: -1 })
