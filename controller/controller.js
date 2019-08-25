@@ -1,10 +1,11 @@
 var express = require("express");
 var router = express.Router();
 var path = require("path");
-
+var axios =require("axios");
 
 var request = require("request");
 var cheerio = require("cheerio");
+// var axios =require("axios");
 
 var Comment = require("../models/Comment.js");
 var Article = require("../models/Article.js");
@@ -13,21 +14,33 @@ router.get("/", function(req, res) {
   res.redirect("/articles");
 });
 
+
 router.get("/scrape", function(req, res) {
-  request("http:longform.org", function(error, response, html) {
+  var titlesArray = [];
+  request("https://www.longform.org/best", function(error, response, html) {
+    // Load the html body from request into cheerio
     var $ = cheerio.load(html);
-    var titlesArray = [];
 
-    $("p.post post--single js-post").each(function(i, element) {
+  console.log(html);
+
+  // Set the articles array for handlebar use
+
+
+    $("article.h2").each(function(i, element) {
       var result = {};
-      console.log(result);
 
+      result.id=i;
       result.title = $(this)
         .children("a")
         .text();
       result.link = $(this)
         .children("a")
         .attr("href");
+
+        result.push(titlesArray);
+
+
+        res.render("/scrape", { articles: titlesArray });
 
 
       if (result.title !== "" && result.link !== "") {
@@ -98,30 +111,30 @@ router.get("/readArticle/:id", function(req, res) {
     body: []
   };
 
-  Article.findOne({ _id: articleId })
-    .populate("comment")
-    .exec(function(err, doc) {
-      if (err) {
-        console.log("Error: " + err);
-      } else {
-        hbsObj.article = doc;
-        var link = doc.link;
-        request(link, function(error, response, html) {
-          var $ = cheerio.load(html);
+  // Article.findOne({ _id: articleId })
+  //   .populate("comment")
+  //   .exec(function(err, doc) {
+  //     if (err) {
+  //       console.log("Error: " + err);
+  //     } else {
+  //       hbsObj.article = doc;
+  //       var link = doc.link;
+  //       request(link, function(error, response, html) {
+  //         var $ = cheerio.load(response.data);
 
-          $(".1-col__main").each(function(i, element) {
-            hbsObj.body = $(this)
-            .children("post post--single js-post")
-              .children("p")
-              .text();
+  //         $(".1-col__main").each(function(i, element) {
+  //           hbsObj.body = $(this)
+  //           .children("div.river js-river")
+  //             .children("p")
+  //             .text();
 
 
-            res.render("article", hbsObj);
-            return false;
-          });
-        });
-      }
-    });
+  //           res.render("article", hbsObj);
+  //           return false;
+  //         });
+  //       });
+  //     }
+  //   });
 });
 router.post("/comment/:id", function(req, res) {
   var user = req.body.name;
