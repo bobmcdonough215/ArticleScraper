@@ -2,7 +2,6 @@ var express = require("express");
 var router = express.Router();
 var path = require("path");
 
-var axios = require("axios")
 
 var request = require("request");
 var cheerio = require("cheerio");
@@ -15,11 +14,11 @@ router.get("/", function(req, res) {
 });
 
 router.get("/scrape", function(req, res) {
-  request("http:longform.org/best", function(error, response, html) {
+  request("http:longform.org", function(error, response, html) {
     var $ = cheerio.load(html);
     var titlesArray = [];
 
-    $(".river js-river").each(function(i, element) {
+    $("p.post post--single js-post").each(function(i, element) {
       var result = {};
       console.log(result);
 
@@ -30,9 +29,6 @@ router.get("/scrape", function(req, res) {
         .children("a")
         .attr("href");
 
-        result.summary = $(this)
-        .children("p")
-        .text();
 
       if (result.title !== "" && result.link !== "") {
         if (titlesArray.indexOf(result.title) == -1) {
@@ -113,8 +109,9 @@ router.get("/readArticle/:id", function(req, res) {
         request(link, function(error, response, html) {
           var $ = cheerio.load(html);
 
-          $(".river js-river").each(function(i, element) {
+          $(".1-col__main").each(function(i, element) {
             hbsObj.body = $(this)
+            .children("post post--single js-post")
               .children("p")
               .text();
 
