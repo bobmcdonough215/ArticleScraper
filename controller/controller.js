@@ -38,23 +38,24 @@ router.get("/scrape", function(req, res) {
   // Set the articles array for handlebar use
 
 
-    $(".post").each(function(i, element) {
+    $(".post--single.js-post").each(function(i, element) {
       var result = {};
 
       result.title = $(this)
-      .eq(2)
-      .children("h2")
-      .children("span")
+      .find(".post__title__highlight")
       .text()
-
+      .replace("\\n", "")
+      .trim()
 
       result.link =$(this)
+      .children("a")
       .attr("href")
 
       result.summary=$(this)
-      .eq(3)
-      .children("div")
+      .find(".post__body p")
       .text()
+      .replace("\\n", "")
+      .trim()
 
       console.log(result);
 
@@ -74,40 +75,6 @@ router.get("/scrape", function(req, res) {
 res.send("Scrape Complete");
 });
 });
-
-
-
-    //     result.push(titlesArray);
-
-
-    //     res.render("/scrape", { articles: titlesArray });
-
-
-    //   if (result.title !== "" && result.link !== "") {
-    //     if (titlesArray.indexOf(result.title) == -1) {
-    //       titlesArray.push(result.title);
-
-    //       Article.count({ title: result.title }, function(err, test) {
-    //         if (test === 0) {
-    //           var entry = new Article(result);
-
-    //           entry.save(function(err, doc) {
-    //             if (err) {
-    //               console.log(err);
-    //             } else {
-    //               console.log(doc);
-    //             }
-    //           });
-    //         }
-    //       });
-    //     } else {
-    //       console.log("Article already exists.");
-    //     }
-    //   } else {
-    //     console.log("Not saved to DB, missing data");
-    //   }
-    // });
-    // res.redirect("/");
 
 router.get("/articles", function(req, res) {
   Article.find()
@@ -150,30 +117,29 @@ router.get("/readArticle/:id", function(req, res) {
     body: []
   };
 
-  // Article.findOne({ _id: articleId })
-  //   .populate("comment")
-  //   .exec(function(err, doc) {
-  //     if (err) {
-  //       console.log("Error: " + err);
-  //     } else {
-  //       hbsObj.article = doc;
-  //       var link = doc.link;
-  //       request(link, function(error, response, html) {
-  //         var $ = cheerio.load(response.data);
+  Article.findOne({ _id: articleId })
+    .populate("comment")
+    .exec(function(err, doc) {
+      if (err) {
+        console.log("Error: " + err);
+      } else {
+        hbsObj.article = doc;
+        var link = doc.link;
+        request(link, function(error, response, html) {
+          var $ = cheerio.load(html);
 
-  //         $(".1-col__main").each(function(i, element) {
-  //           hbsObj.body = $(this)
-  //           .children("div.river js-river")
-  //             .children("p")
-  //             .text();
+          $("div.row").each(function(i, element) {
+            hbsObj.body = $(this)
+              .children(0)
+              .children(1)
+              .text();
 
-
-  //           res.render("article", hbsObj);
-  //           return false;
-  //         });
-  //       });
-  //     }
-  //   });
+            res.render("article", hbsObj);
+            return false;
+          });
+        });
+      }
+    });
 });
 router.post("/comment/:id", function(req, res) {
   var user = req.body.name;
@@ -210,3 +176,103 @@ router.post("/comment/:id", function(req, res) {
 });
 
 module.exports = router;
+
+
+
+// router.get("/articles", function(req, res) {
+//   Article.find()
+//     .sort({ _id: -1 })
+//     .exec(function(err, doc) {
+//       if (err) {
+//         console.log(err);
+//       } else {
+//         var artcl = { article: doc };
+//         res.render("index", artcl);
+//       }
+//     });
+// });
+
+// router.get("/articles-json", function(req, res) {
+//   Article.find({}, function(err, doc) {
+//     if (err) {
+//       console.log(err);
+//     } else {
+//       res.json(doc);
+//     }
+//   });
+// });
+
+
+// router.get("/readArticle/:id", function(req, res) {
+//   var articleId = req.params.id;
+//   var hbsObj = {
+//     article: [],
+//     body: []
+//   };
+//   router.get("/readArticle/:id", function(req, res) {
+//     var articleId = req.params.id;
+//     var hbsObj = {
+//       article: [],
+//       body: []
+//     };
+  
+//     Article.findOne({ _id: articleId })
+//       .populate("comment")
+//       .exec(function(err, doc) {
+//         if (err) {
+//           console.log("Error: " + err);
+//         } else {
+//           hbsObj.article = doc;
+//           var link = doc.link;
+//           request(link, function(error, response, html) {
+//             var $ = cheerio.load(html);
+  
+//             $(".p").each(function(i, element) {
+//               hbsObj.body = $(this)
+//                 .children(".post")
+//                 .children("p")
+//                 .text();
+  
+//               res.render("article", hbsObj);
+//               return false;
+//             });
+//           });
+//         }
+//       });
+//   });
+
+// router.post("/comment/:id", function(req, res) {
+//   var user = req.body.name;
+//   var content = req.body.comment;
+//   var articleId = req.params.id;
+
+//   var commentObj = {
+//     name: user,
+//     body: content
+//   };
+
+//   var newComment = new Comment(commentObj);
+
+//   newComment.save(function(err, doc) {
+//     if (err) {
+//       console.log(err);
+//     } else {
+//       console.log(doc._id);
+//       console.log(articleId);
+
+//       Article.findOneAndUpdate(
+//         { _id: req.params.id },
+//         { $push: { comment: doc._id } },
+//         { new: true }
+//       ).exec(function(err, doc) {
+//         if (err) {
+//           console.log(err);
+//         } else {
+//           res.redirect("/readArticle/" + articleId);
+//         }
+//       });
+//     }
+//   });
+// });
+// })
+// module.exports = router;
