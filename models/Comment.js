@@ -20,4 +20,4 @@ name: {
 var Comment = mongoose.model("Comment", CommentSchema);
 
 // Export the Note model
-module.exports = Note;
+module.exports = Comment;

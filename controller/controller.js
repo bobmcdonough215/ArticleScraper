@@ -2,6 +2,8 @@ var express = require("express");
 var router = express.Router();
 var path = require("path");
 
+var axios = require("axios")
+
 var request = require("request");
 var cheerio = require("cheerio");
 
@@ -9,16 +11,17 @@ var Comment = require("../models/Comment.js");
 var Article = require("../models/Article.js");
 
 router.get("/", function(req, res) {
-  res.redirect("/articles");
+  res.redirect("/index");
 });
 
 router.get("/scrape", function(req, res) {
-  request("http://www.inquirer.com", function(error, response, html) {
+  axios.get("http:longform.org/best", function(error, response, html) {
     var $ = cheerio.load(html);
     var titlesArray = [];
 
-    $(".c-entry-box--compact__title").each(function(i, element) {
+    $(".river js-river").each(function(i, element) {
       var result = {};
+      console.log(result);
 
       result.title = $(this)
         .children("a")
@@ -26,6 +29,10 @@ router.get("/scrape", function(req, res) {
       result.link = $(this)
         .children("a")
         .attr("href");
+
+        result.summary = $(this)
+        .children("p")
+        .text();
 
       if (result.title !== "" && result.link !== "") {
         if (titlesArray.indexOf(result.title) == -1) {
@@ -106,11 +113,11 @@ router.get("/readArticle/:id", function(req, res) {
         request(link, function(error, response, html) {
           var $ = cheerio.load(html);
 
-          $(".l-col__main").each(function(i, element) {
+          $(".river js-river").each(function(i, element) {
             hbsObj.body = $(this)
-              .children(".c-entry-content")
               .children("p")
               .text();
+              
 
             res.render("article", hbsObj);
             return false;

@@ -26,6 +26,10 @@ db.once("open", function(){
     console.log("Connected to Mongoose");
 });
 
+// Import and use routes.
+var scraperRoutes = require("./controller/controller.js");
+app.use(scraperRoutes);
+
 
 var port = process.env.PORT ||3000
 app.listen(port, function(){
