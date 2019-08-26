@@ -22,8 +22,9 @@ var db =require("../models");
 
 var Comment = require("../models/Comment.js");
 var Article = require("../models/Article.js");
-mongoose.connect("mongodb://localhost/articleScraper", { useNewUrlParser: true });
+var MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/articleScraper";
 
+mongoose.connect(MONGODB_URI);
 
 
 // router.get("/", function(req, res){
