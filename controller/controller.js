@@ -26,9 +26,9 @@ mongoose.connect("mongodb://localhost/articleScraper", { useNewUrlParser: true }
 
 
 
-router.get("/", function(req, res){
-  res.redirect("/articles")
-})
+// router.get("/", function(req, res){
+//   res.redirect("/articles")
+// })
 router.get("/scrape", function(req, res) {
   request.get("https://www.longform.org/best", function(error, response, html) {
     // Load the html body from request into cheerio
@@ -76,7 +76,7 @@ res.send("Scrape Complete");
 });
 });
 
-router.get("/articles", function(req, res) {
+router.get("/", function(req, res) {
   Article.find()
     .sort({ _id: -1 })
     .exec(function(err, doc) {
